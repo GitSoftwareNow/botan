@@ -49,12 +49,12 @@ For all the details on building the library, read the
   # shows available commands
   $ make install
 
-On Debin Ubuntu or Ubuntu like, you can  
-cd botan  
-sudo dpkg-buildpackage -us -uc  
-or  
-fakeroot dh binary  
+On Debin Ubuntu or Ubuntu like, you can 
 
+  cd botan
+  sudo dpkg-buildpackage -us -uc
+  or  
+  fakeroot dh binary  
 It will be make a package to install  
 
 Botan can also be built into a single-file amalgamation for easy inclusion into

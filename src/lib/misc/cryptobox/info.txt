@@ -1,0 +1,13 @@
+<defines>
+CRYPTO_BOX -> 20131128
+</defines>
+
+<requires>
+base64
+ctr
+hmac
+pbkdf2
+pem
+serpent
+sha2_64
+</requires>

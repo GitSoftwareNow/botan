@@ -1,0 +1,41 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+DOCPKG = $(CURDIR)/debian/libbotan-2-doc
+
+override_dh_clean:
+	dh_clean
+	rm -f $(CURDIR)/Certificate\ Store*.db
+
+override_dh_auto_configure:
+	cat /proc/cpuinfo
+	$(CURDIR)/configure.py \
+		--prefix=/usr/ \
+		$(if $(filter $(DEB_HOST_ARCH), armel armhf),--disable-neon) \
+		--with-rst2man \
+		--with-bzip2 \
+		--with-lzma \
+		--with-openssl \
+		--with-sqlite3 \
+		--with-tpm \
+		--with-zlib \
+		--with-python-versions=3 \
+		$(if $(filter $(DEB_HOST_ARCH), armhf),--cpu=armv7) \
+		--distribution-info=$(shell dpkg-vendor --query Vendor)
+
+override_dh_auto_test:
+	LD_LIBRARY_PATH=. $(CURDIR)/botan-test
+
+override_dh_install:
+	dh_install
+	rm -rf $(DOCPKG)/usr/share/doc/libbotan-2-doc/manual/.doctrees
+	dh_missing --list-missing
+
+%:
+	dh $@ --with python3
+
+.PHONY: override_dh_clean override_dh_auto_configure override_dh_auto_test \
+	override_dh_install

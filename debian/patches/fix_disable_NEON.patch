@@ -1,0 +1,73 @@
+From 67652aed9d0240dfee628a9a67f204d468df90d4 Mon Sep 17 00:00:00 2001
+From: Jack Lloyd <jack@randombit.net>
+Date: Sun, 18 Mar 2018 11:10:23 -0400
+Subject: [PATCH] Fix --disable-{neon,sse2,altivec} for simd_32 users
+
+Using --disable-neon was not effective because simd_32 users had
+special logic that would still enable it.
+---
+ configure.py | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/configure.py b/configure.py
+index 5799e62010..ec2f4abdb8 100755
+--- a/configure.py
++++ b/configure.py
+@@ -1086,12 +1086,14 @@ def isa_flags_for(self, isa, arch):
+             return self.isa_flags[arch_isa]
+         return None
+ 
+-    def get_isa_specific_flags(self, isas, arch):
++    def get_isa_specific_flags(self, isas, arch, options):
+         flags = set()
+ 
+         def simd32_impl():
+             for simd_isa in ['sse2', 'altivec', 'neon']:
+-                if simd_isa in arch.isa_extensions and self.isa_flags_for(simd_isa, arch.basename):
++                if simd_isa in arch.isa_extensions and \
++                   simd_isa not in options.disable_intrinsics and \
++                   self.isa_flags_for(simd_isa, arch.basename):
+                     return simd_isa
+             return None
+ 
+@@ -1586,7 +1588,7 @@ def remove_dups(parts):
+         name = name.replace('.cpp', obj_suffix)
+         yield os.path.join(obj_dir, name)
+ 
+-def generate_build_info(build_paths, modules, cc, arch, osinfo):
++def generate_build_info(build_paths, modules, cc, arch, osinfo, options):
+     # pylint: disable=too-many-locals
+ 
+     # first create a map of src_file->owning module
+@@ -1599,7 +1601,7 @@ def generate_build_info(build_paths, modules, cc, arch, osinfo):
+ 
+     def _isa_specific_flags(src):
+         if os.path.basename(src) == 'test_simd.cpp':
+-            return cc.get_isa_specific_flags(['simd'], arch)
++            return cc.get_isa_specific_flags(['simd'], arch, options)
+ 
+         if src in module_that_owns:
+             module = module_that_owns[src]
+@@ -1607,11 +1607,11 @@ def generate_build_info(build_paths, mod
+             if 'simd' in module.dependencies():
+                 isas.append('simd')
+ 
+-            return cc.get_isa_specific_flags(isas, arch)
++            return cc.get_isa_specific_flags(isas, arch, options)
+ 
+         if src.startswith('botan_all_'):
+             isas = src.replace('botan_all_', '').replace('.cpp', '').split('_')
+-            return cc.get_isa_specific_flags(isas, arch)
++            return cc.get_isa_specific_flags(isas, arch, options)
+ 
+         return ''
+ 
+@@ -2931,7 +2931,7 @@ def main_action_configure_build(info_mod
+         build_config.lib_sources = amalg_cpp_files
+         template_vars['generated_files'] = ' '.join(amalg_cpp_files + amalg_headers)
+ 
+-    template_vars.update(generate_build_info(build_config, using_mods, cc, arch, osinfo))
++    template_vars.update(generate_build_info(build_config, using_mods, cc, arch, osinfo, options))
+ 
+     with open(os.path.join(build_config.build_dir, 'build_config.json'), 'w') as f:
+         json.dump(template_vars, f, sort_keys=True, indent=2)

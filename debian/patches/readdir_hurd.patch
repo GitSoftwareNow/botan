@@ -1,0 +1,19 @@
+Description: Hurd FTBFS fix
+ Add readdir possibility to Hurd architecture.
+Origin: upstream
+Author: Jack Lloyd <jack@randombit.net>
+Forwarded: not-needed
+Last-Update: 2018-03-16
+
+---
+
+--- botan-2.4.0.orig/src/build-data/os/hurd.txt
++++ botan-2.4.0/src/build-data/os/hurd.txt
+@@ -6,6 +6,7 @@ soname_suffix "so"
+ posix_mlock
+ threads
+ filesystem
++readdir
+ </target_features>
+ 
+ <aliases>

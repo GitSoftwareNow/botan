@@ -1,0 +1,9 @@
+Document: libbotan-2-doc
+Title: Botan: Crypto and TLS for C++11
+Author: Jack Lloyd
+Abstract: Botan Reference Manual
+Section: Programming
+
+Format: HTML
+Index: /usr/share/doc/libbotan-2-doc/manual/index.html
+Files: /usr/share/doc/libbotan-2-doc/manual/*.html
